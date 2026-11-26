@@ -2,548 +2,241 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>LUXE Beauty Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Фея Лира и лунный сад</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;600&display=swap');
-
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-  
-  body {
-    margin: 0; padding: 0; height: 100vh; overflow: hidden;
-    /* Дорогой градиентный фон */
-    background: radial-gradient(circle at 50% 0%, #2a1b38 0%, #110b14 100%);
-    font-family: 'Montserrat', sans-serif;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: space-between;
-    color: #fff;
-  }
-
-  #header {
-    width: 100%; text-align: center; padding: 15px 0;
-    font-family: 'Playfair Display', serif;
-    font-size: 24px; letter-spacing: 2px;
-    color: #e6c887; /* Золотой цвет */
-    text-shadow: 0 0 10px rgba(230, 200, 135, 0.3);
-    z-index: 10;
-  }
-
-  #canvas-container {
-    position: relative;
-    width: 100%;
-    flex-grow: 1;
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden;
-  }
-
-  canvas {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    touch-action: none;
-    /* Стеклянная рамка вокруг портрета */
-    border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5), 
-                inset 0 0 0 2px rgba(255,255,255,0.1);
-    background: transparent;
-  }
-
-  #toolbar {
-    width: 100%;
-    max-width: 600px;
-    background: rgba(20, 15, 25, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    padding: 20px 15px 30px 15px;
-    display: flex; flex-direction: column; gap: 15px;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
-    z-index: 10;
-  }
-
-  #colors {
-    display: flex; justify-content: center; gap: 15px;
-    overflow-x: auto; padding: 5px;
-  }
-  
-  .color-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 2px solid transparent;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    flex-shrink: 0;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    cursor: pointer;
-    position: relative;
-  }
-  
-  .color-btn.active { 
-    transform: scale(1.3); 
-    border-color: #fff; 
-    box-shadow: 0 0 15px currentColor;
-  }
-
-  #tools {
-    display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
-  }
-
-  .tool-btn {
-    background: rgba(255,255,255,0.05); 
-    border: 1px solid rgba(255,255,255,0.1); 
-    border-radius: 20px;
-    padding: 12px 18px; font-size: 13px; font-weight: 600; color: #ccc;
-    display: flex; align-items: center; gap: 8px;
-    cursor: pointer; transition: all 0.3s;
-    font-family: 'Montserrat', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  
-  .tool-btn.active { 
-    background: #e6c887; 
-    color: #110b14; 
-    border-color: #e6c887;
-    box-shadow: 0 0 20px rgba(230, 200, 135, 0.4); 
-  }
-
-  #top-controls {
-    position: absolute; top: 20px; right: 20px;
-    display: flex; gap: 12px; z-index: 10;
-  }
-  
-  .icon-btn {
-    width: 45px; height: 45px; border-radius: 50%;
-    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
-    color: #fff; font-size: 20px; display: flex; justify-content: center; align-items: center;
-    cursor: pointer; transition: all 0.2s;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-  }
-  
-  .icon-btn:active { transform: scale(0.9); background: rgba(255,255,255,0.2); }
+  :root{--plum:#1a0b3d;--pink:#ff5fa2;--mint:#7ff3d0;--gold:#ffd86b;--lilac:#b9a2ff;--font:"Fredoka","Trebuchet MS",system-ui,sans-serif}
+  *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:var(--plum);font-family:var(--font);color:#fff;touch-action:none;user-select:none}
+  canvas{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #hud{position:fixed;left:0;right:0;top:0;padding:max(12px,env(safe-area-inset-top)) 14px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;pointer-events:none}
+  #goals{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:rgba(26,11,61,.55);backdrop-filter:blur(8px);border:1.5px solid rgba(255,255,255,.25);font-weight:600;font-size:16px;transition:.25s}
+  .chip.done{background:rgba(127,243,208,.3);border-color:var(--mint)}
+  #lives{font-size:24px;letter-spacing:2px;filter:drop-shadow(0 0 8px #ff5fa2)}
+  #lvl{position:fixed;left:0;right:0;top:max(58px,calc(env(safe-area-inset-top) + 46px));text-align:center;font-size:15px;opacity:.85;pointer-events:none;text-shadow:0 0 10px #000a}
+  #ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 40%,rgba(26,11,61,.35),rgba(26,11,61,.85));transition:opacity .4s}
+  #ov.hide{opacity:0;pointer-events:none}
+  .card{max-width:420px;text-align:center}
+  h1{font-size:clamp(34px,8vw,54px);line-height:1.05;font-weight:600;background:linear-gradient(90deg,var(--gold),var(--pink),var(--lilac),var(--mint));-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 18px rgba(255,95,162,.6))}
+  p{margin:14px 0 22px;font-size:18px;line-height:1.4;opacity:.92}
+  button{font:600 22px var(--font);color:#3a0f4f;padding:14px 38px;border:0;border-radius:999px;cursor:pointer;background:linear-gradient(135deg,var(--gold),#ff9ccc);box-shadow:0 0 0 4px rgba(255,255,255,.2),0 10px 40px rgba(255,95,162,.6);transition:transform .15s}
+  button:hover{transform:scale(1.06)}button:active{transform:scale(.96)}
+  button:focus-visible{outline:3px solid #fff;outline-offset:4px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-
-  <div id="header">LUXE BEAUTY</div>
-
-  <div id="canvas-container">
-    <canvas id="gameCanvas"></canvas>
-    
-    <div id="top-controls">
-      <button class="icon-btn" id="btnUndo" title="Отменить">↩</button>
-      <button class="icon-btn" id="btnNext" title="Следующая модель">➡</button>
-    </div>
-  </div>
-
-  <div id="toolbar">
-    <div id="colors"></div>
-    <div id="tools">
-      <button class="tool-btn active" data-tool="brush">Помада</button>
-      <button class="tool-btn" data-tool="eyes">Тени</button>
-      <button class="tool-btn" data-tool="blush">Румяна</button>
-      <button class="tool-btn" data-tool="eraser">Ластик</button>
-    </div>
-  </div>
+<canvas id="c"></canvas>
+<div id="hud"><div id="goals"></div><div id="lives"></div></div>
+<div id="lvl"></div>
+<div id="ov"><div class="card"><h1 id="t">Фея Лира и лунный сад</h1><p id="s">Веди фею пальцем или мышкой и собирай звёзды. Обходи сонные грозовые тучки!</p><button id="b">Играть</button></div></div>
 
 <script>
-(function(){
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-  const container = document.getElementById('canvas-container');
+(()=>{
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let W,H,DPR,U;
+function rs(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);U=Math.max(26,Math.min(W,H)*.055)}
+addEventListener('resize',rs);rs();
 
-  let W = 400, H = 500;
-  let dpr = window.devicePixelRatio || 1;
-  
-  let isDrawing = false;
-  let lastX = 0, lastY = 0;
-  
-  let currentColor = '#e91e63';
-  let currentTool = 'brush';
-  let brushSize = 15;
-  
-  let history = [];
-  const MAX_HISTORY = 15;
+/* ---------- Уровни и задания ---------- */
+const LEVELS=[
+ {name:'Первые звёзды',goal:{star:10},speed:1,cloud:.12,crystal:0},
+ {name:'Радужные кристаллы',goal:{star:8,crystal:3},speed:1.15,cloud:.18,crystal:.14},
+ {name:'Грозовая ночь',goal:{star:12,crystal:4},speed:1.3,cloud:.28,crystal:.14},
+ {name:'Королева лунного сада',goal:{star:15,crystal:6},speed:1.5,cloud:.32,crystal:.16}
+];
+const ICON={star:'⭐',crystal:'💎'};
 
-  // Цветовые схемы для разных моделей
-  const models = [
-    { skinBase: '#fce4d6', skinShadow: '#e8bca4', hairBase: '#3a1c14', hairHighlight: '#5c2e1c', bg: 'linear' },
-    { skinBase: '#f5d0b5', skinShadow: '#d9a07e', hairBase: '#b07d4b', hairHighlight: '#d4a373', bg: 'radial' },
-    { skinBase: '#e8bca4', skinShadow: '#c99a82', hairBase: '#111', hairHighlight: '#333', bg: 'linear' }
-  ];
-  let currentModelIndex = 0;
+/* ---------- Состояние ---------- */
+let st='menu',lv=0,lives=3,got={},items=[],parts=[],floats=[],t=0,spawn=0,inv=0,shake=0,combo=0;
+const fairy={x:0,y:0,tx:0,ty:0,vx:0};
+const keys={};
+const bg={stars:Array.from({length:90},()=>({x:Math.random(),y:Math.random()*.7,r:Math.random()*1.6+.4,p:Math.random()*6})),
+ orbs:Array.from({length:14},()=>({x:Math.random(),y:Math.random(),r:Math.random()*40+18,s:Math.random()*.02+.005,h:Math.random()*360}))};
 
-  // Дорогая палитра (нюдовые и яркие оттенки)
-  const palette = [
-    '#ff4d4d', '#ff1a66', '#ff66cc', '#9933ff', 
-    '#00ccff', '#ffcc00', '#ff9933', '#ffffff'
-  ];
+/* ---------- Звук ---------- */
+let ac;
+function tone(f,d=.15,type='sine',v=.07){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+const chime=n=>{tone(660+n*70,.18);setTimeout(()=>tone(990+n*90,.22),70)};
 
-  function initUI() {
-    const colorsDiv = document.getElementById('colors');
-    palette.forEach(c => {
-      const btn = document.createElement('div');
-      btn.className = 'color-btn';
-      btn.style.background = c;
-      btn.style.color = c; // Для свечения (box-shadow)
-      if (c === currentColor) btn.classList.add('active');
-      btn.onclick = () => {
-        currentColor = c;
-        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      };
-      colorsDiv.appendChild(btn);
-    });
+/* ---------- HUD ---------- */
+const goalsEl=document.getElementById('goals'),livesEl=document.getElementById('lives'),lvlEl=document.getElementById('lvl');
+function hud(){
+ const L=LEVELS[lv];
+ goalsEl.innerHTML=Object.keys(L.goal).map(k=>{const d=(got[k]||0)>=L.goal[k];return `<div class="chip ${d?'done':''}">${ICON[k]} ${Math.min(got[k]||0,L.goal[k])} / ${L.goal[k]}</div>`}).join('');
+ livesEl.textContent='💗'.repeat(lives)+'🖤'.repeat(3-lives);
+ lvlEl.textContent=`Уровень ${lv+1}: ${L.name}`;
+}
 
-    document.querySelectorAll('.tool-btn').forEach(btn => {
-      btn.onclick = () => {
-        currentTool = btn.dataset.tool;
-        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        
-        if (currentTool === 'eraser') brushSize = 40;
-        else if (currentTool === 'blush') brushSize = 70;
-        else if (currentTool === 'eyes') brushSize = 30;
-        else brushSize = 14;
-      };
-    });
+/* ---------- Управление ---------- */
+function setT(e){fairy.tx=e.clientX;fairy.ty=e.clientY-U*1.2}
+addEventListener('pointermove',e=>{if(st==='play')setT(e)});
+addEventListener('pointerdown',e=>{if(st==='play')setT(e)});
+addEventListener('keydown',e=>{keys[e.key]=1});addEventListener('keyup',e=>{keys[e.key]=0});
+
+/* ---------- Игровая логика ---------- */
+function startLevel(n){
+ lv=n;got={};items=[];parts=[];floats=[];lives=3;combo=0;inv=0;
+ fairy.x=fairy.tx=W/2;fairy.y=fairy.ty=H*.75;st='play';spawn=0;hud();
+ document.getElementById('ov').classList.add('hide');
+}
+function overlay(t_,s_,btn,fn){
+ document.getElementById('t').textContent=t_;document.getElementById('s').textContent=s_;
+ const b=document.getElementById('b');b.textContent=btn;b.onclick=()=>{tone(520,.1);fn()};
+ document.getElementById('ov').classList.remove('hide');
+}
+function burst(x,y,hue,n=18,sp=4){for(let i=0;i<n;i++){const a=Math.random()*6.28,v=Math.random()*sp+1;parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:1,d:.02+Math.random()*.02,r:Math.random()*3+1.5,h:hue+Math.random()*40-20})}}
+function say(x,y,txt,col){floats.push({x,y,txt,col,life:1})}
+function spawnItem(){
+ const L=LEVELS[lv],r=Math.random();let type='star';
+ if(r<L.cloud)type='cloud';else if(r<L.cloud+L.crystal)type='crystal';else if(lives<3&&Math.random()<.06)type='heart';
+ const rad=type==='cloud'?U*1.1:U*.62;
+ items.push({type,x:rad+Math.random()*(W-rad*2),y:-rad*2,r:rad,vy:(1.6+Math.random()*1.2)*L.speed*(U/34),ph:Math.random()*6,rot:0});
+}
+function check(){
+ const L=LEVELS[lv];
+ if(Object.keys(L.goal).every(k=>(got[k]||0)>=L.goal[k])){
+  st='won';tone(784,.2);setTimeout(()=>tone(988,.2),150);setTimeout(()=>tone(1318,.4),300);
+  for(let i=0;i<6;i++)setTimeout(()=>burst(Math.random()*W,Math.random()*H*.6,Math.random()*360,30,6),i*160);
+  setTimeout(()=>{
+   if(lv<LEVELS.length-1)overlay('Уровень пройден! ✨',`Ты великолепна! Дальше: «${LEVELS[lv+1].name}»`,'Дальше',()=>startLevel(lv+1));
+   else overlay('Ты — королева сада! 👑','Все звёзды собраны, лунный сад снова сияет. Сыграем ещё раз?','Сначала',()=>startLevel(0));
+  },1500);
+ }
+}
+function update(){
+ t+=.016;
+ if(st!=='play'&&st!=='won'){fairy.x+=(W/2+Math.sin(t)*W*.2-fairy.x)*.03;fairy.y+=(H*.6+Math.cos(t*1.3)*H*.08-fairy.y)*.03}
+ if(st==='play'){
+  const k=U*.4;
+  if(keys.ArrowLeft||keys.a)fairy.tx-=k;if(keys.ArrowRight||keys.d)fairy.tx+=k;
+  if(keys.ArrowUp||keys.w)fairy.ty-=k;if(keys.ArrowDown||keys.s)fairy.ty+=k;
+  fairy.tx=Math.max(U,Math.min(W-U,fairy.tx));fairy.ty=Math.max(U*2,Math.min(H-U,fairy.ty));
+  const ox=fairy.x;fairy.x+=(fairy.tx-fairy.x)*.18;fairy.y+=(fairy.ty-fairy.y)*.18;fairy.vx=fairy.x-ox;
+  spawn-=1;if(spawn<=0){spawnItem();spawn=48/LEVELS[lv].speed*(.7+Math.random()*.6)}
+  if(inv>0)inv--;
+  for(const it of items){
+   it.y+=it.vy;it.rot+=.03;it.x+=Math.sin(t*2+it.ph)*.6;
+   const dx=it.x-fairy.x,dy=it.y-fairy.y;
+   if(!it.dead&&Math.hypot(dx,dy)<it.r+U*.55){
+    it.dead=true;
+    if(it.type==='cloud'){
+     if(inv<=0){lives--;inv=80;shake=14;combo=0;tone(150,.35,'sawtooth',.08);burst(it.x,it.y,270,16,3);say(it.x,it.y,'Ой!','#c9b6ff');
+      if(lives<=0){st='over';setTimeout(()=>overlay('Тучки победили 🌧️','Не грусти! Попробуй ещё раз — ты почти справилась.','Ещё раз',()=>startLevel(lv)),700)}}
+    }else if(it.type==='heart'){lives=Math.min(3,lives+1);burst(it.x,it.y,340,22);say(it.x,it.y,'+💗','#ff9ccc');tone(880,.3)}
+    else{combo++;const n=it.type==='star'?1:1;got[it.type]=(got[it.type]||0)+n;burst(it.x,it.y,it.type==='star'?50:Math.random()*360,it.type==='star'?16:26);
+     say(it.x,it.y,combo>=5?`+1 ×${Math.floor(combo/5)+1}`:'+1',it.type==='star'?'#ffd86b':'#7ff3d0');chime(Math.min(combo,8));}
+    hud();if(st==='play')check();
+   }
   }
+  items=items.filter(i=>!i.dead&&i.y<H+i.r*2);
+  if(Math.random()<.9)parts.push({x:fairy.x-fairy.vx*2+(Math.random()-.5)*U*.4,y:fairy.y+U*.5,vx:(Math.random()-.5)*.8,vy:Math.random()*1.2+.4,life:1,d:.025,r:Math.random()*2.6+1,h:300+Math.random()*80});
+ }
+ for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.vy+=.02;p.life-=p.d}parts=parts.filter(p=>p.life>0);
+ for(const f of floats){f.y-=1.1;f.life-=.025}floats=floats.filter(f=>f.life>0);
+ if(shake>0)shake--;
+}
 
-  function resize() {
-    const rect = container.getBoundingClientRect();
-    const aspect = 4/5;
-    let w = rect.width * 0.95; // Чуть отступа от краев
-    let h = rect.height * 0.95;
-    
-    if (w / h > aspect) w = h * aspect;
-    else h = w / aspect;
+/* ---------- Рисование ---------- */
+function glow(x,y,r,c,a=1){const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,c.replace('A',a));g.addColorStop(1,c.replace('A',0));ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,r,0,6.283);ctx.fill()}
+function starPath(x,y,R,r,rot){ctx.beginPath();for(let i=0;i<10;i++){const a=rot+i*Math.PI/5-Math.PI/2,q=i%2?r:R;ctx[i?'lineTo':'moveTo'](x+Math.cos(a)*q,y+Math.sin(a)*q)}ctx.closePath()}
+function drawBg(){
+ const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#12062e');g.addColorStop(.45,'#4a1a85');g.addColorStop(.8,'#c4479a');g.addColorStop(1,'#ff9a8b');
+ ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ for(const s of bg.stars){ctx.globalAlpha=.4+.6*Math.abs(Math.sin(t*1.5+s.p));ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(s.x*W,s.y*H,s.r,0,6.283);ctx.fill()}
+ ctx.globalAlpha=1;
+ const mx=W*.78,my=H*.2,mr=Math.min(W,H)*.09;
+ glow(mx,my,mr*4,'rgba(255,230,250,A)',.35);
+ ctx.fillStyle='#fff6e0';ctx.beginPath();ctx.arc(mx,my,mr,0,6.283);ctx.fill();
+ ctx.fillStyle='rgba(230,200,220,.5)';[[-.3,-.2,.22],[.25,.15,.3],[-.1,.4,.15]].forEach(c=>{ctx.beginPath();ctx.arc(mx+c[0]*mr,my+c[1]*mr,c[2]*mr,0,6.283);ctx.fill()});
+ ctx.globalCompositeOperation='lighter';
+ for(const o of bg.orbs){const x=((o.x*W+t*o.s*W*2)%(W+200))-100,y=(o.y*H+Math.sin(t+o.h)*20);glow(x,y,o.r,`hsla(${o.h},90%,70%,A)`,.14)}
+ ctx.globalCompositeOperation='source-over';
+ const hills=[['#3a1670',.74,.05,.6,.25],['#2a0f55',.82,.07,1,.4],['#170838',.9,.06,1.6,.6]];
+ hills.forEach(([c,y0,amp,sp,ph],i)=>{ctx.fillStyle=c;ctx.beginPath();ctx.moveTo(0,H);for(let x=0;x<=W+10;x+=10)ctx.lineTo(x,H*y0+Math.sin(x*.004*(i+1)+ph*6+t*.05*sp)*H*amp);ctx.lineTo(W,H);ctx.fill()});
+ // светящиеся цветы на переднем плане
+ for(let i=0;i<9;i++){const x=(i+.5)/9*W,y=H*.95+Math.sin(i*2)*H*.015,s=Math.sin(t*2+i)*.2+1;glow(x,y-U*.3,U*1.1*s,'rgba(127,243,208,A)',.35);ctx.fillStyle=i%2?'#ff7ac0':'#9ff7e0';ctx.beginPath();ctx.arc(x,y-U*.3,U*.13,0,6.283);ctx.fill()}
+}
+function drawItem(it){
+ const {x,y,r}=it;
+ if(it.type==='star'){
+  ctx.globalCompositeOperation='lighter';glow(x,y,r*2.6,'rgba(255,216,107,A)',.55);ctx.globalCompositeOperation='source-over';
+  const g=ctx.createRadialGradient(x,y,0,x,y,r);g.addColorStop(0,'#fffbe0');g.addColorStop(1,'#ffc43d');
+  ctx.fillStyle=g;starPath(x,y,r,r*.48,it.rot);ctx.fill();ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.5;ctx.stroke();
+ }else if(it.type==='crystal'){
+  const h=(t*120+it.ph*60)%360;
+  ctx.globalCompositeOperation='lighter';glow(x,y,r*3,`hsla(${h},100%,65%,A)`,.6);ctx.globalCompositeOperation='source-over';
+  ctx.save();ctx.translate(x,y);ctx.rotate(Math.sin(it.rot)*.25);
+  const g=ctx.createLinearGradient(-r,-r,r,r);g.addColorStop(0,`hsl(${h},100%,85%)`);g.addColorStop(.5,`hsl(${h+60},90%,65%)`);g.addColorStop(1,`hsl(${h+140},90%,60%)`);
+  ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,-r*1.2);ctx.lineTo(r*.85,-r*.2);ctx.lineTo(0,r*1.2);ctx.lineTo(-r*.85,-r*.2);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-r*.85,-r*.2);ctx.lineTo(r*.85,-r*.2);ctx.moveTo(0,-r*1.2);ctx.lineTo(0,r*1.2);ctx.stroke();ctx.restore();
+ }else if(it.type==='heart'){
+  ctx.globalCompositeOperation='lighter';glow(x,y,r*2.5,'rgba(255,95,162,A)',.6);ctx.globalCompositeOperation='source-over';
+  ctx.fillStyle='#ff5fa2';ctx.beginPath();ctx.moveTo(x,y+r*.9);ctx.bezierCurveTo(x-r*1.5,y-r*.1,x-r*.7,y-r*1.1,x,y-r*.35);ctx.bezierCurveTo(x+r*.7,y-r*1.1,x+r*1.5,y-r*.1,x,y+r*.9);ctx.fill();
+ }else{
+  ctx.fillStyle='#3a2a74';ctx.strokeStyle='#8f7ae0';ctx.lineWidth=2;
+  ctx.beginPath();[[-.7,.2,.55],[-.2,-.2,.7],[.4,-.05,.6],[.8,.25,.45],[0,.35,.65]].forEach(c=>{ctx.moveTo(x+c[0]*r+c[2]*r,y+c[1]*r);ctx.arc(x+c[0]*r,y+c[1]*r,c[2]*r,0,6.283)});ctx.fill();
+  ctx.fillStyle='#1a0b3d';[-.35,.3].forEach(e=>{ctx.beginPath();ctx.arc(x+e*r,y+.05*r,r*.1,0,6.283);ctx.fill()});
+  ctx.strokeStyle='#1a0b3d';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(x,y+r*.55,r*.2,3.5,5.9);ctx.stroke();
+  ctx.fillStyle='rgba(255,230,120,.8)';ctx.beginPath();ctx.moveTo(x+r*.1,y+r*.8);ctx.lineTo(x-r*.15,y+r*1.15);ctx.lineTo(x+r*.05,y+r*1.12);ctx.lineTo(x-r*.1,y+r*1.5);ctx.lineTo(x+r*.25,y+r*1);ctx.lineTo(x+r*.08,y+r*1.02);ctx.fill();
+ }
+}
+function drawFairy(){
+ if(inv>0&&Math.floor(inv/5)%2)ctx.globalAlpha=.4;
+ const x=fairy.x,y=fairy.y+Math.sin(t*5)*3,s=U,tilt=Math.max(-.4,Math.min(.4,fairy.vx*.05));
+ ctx.globalCompositeOperation='lighter';glow(x,y,s*3,'rgba(255,150,220,A)',.45);ctx.globalCompositeOperation='source-over';
+ ctx.save();ctx.translate(x,y);ctx.rotate(tilt);
+ const fl=Math.sin(t*22);
+ [-1,1].forEach(d=>{
+  ctx.save();ctx.scale(d,1);
+  const g=ctx.createLinearGradient(0,0,s*1.5,-s);g.addColorStop(0,'rgba(190,255,245,.85)');g.addColorStop(1,'rgba(200,160,255,.45)');
+  ctx.fillStyle=g;ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=1.2;
+  ctx.save();ctx.rotate(-.5+fl*.18);ctx.beginPath();ctx.ellipse(s*.75,-s*.25,s*.75,s*.34,-.4,0,6.283);ctx.fill();ctx.stroke();ctx.restore();
+  ctx.save();ctx.rotate(.35-fl*.12);ctx.beginPath();ctx.ellipse(s*.6,s*.2,s*.5,s*.24,.5,0,6.283);ctx.fill();ctx.stroke();ctx.restore();
+  ctx.restore();
+ });
+ // волосы сзади
+ ctx.fillStyle='#ffb347';ctx.beginPath();ctx.ellipse(0,-s*.55,s*.42,s*.46,0,0,6.283);ctx.fill();
+ ctx.beginPath();ctx.ellipse(-s*.3,-s*.1,s*.2,s*.45,.2,0,6.283);ctx.ellipse(s*.3,-s*.1,s*.2,s*.45,-.2,0,6.283);ctx.fill();
+ // платье
+ const dg=ctx.createLinearGradient(0,-s*.2,0,s*.9);dg.addColorStop(0,'#ff7ac0');dg.addColorStop(1,'#a56bff');
+ ctx.fillStyle=dg;ctx.beginPath();ctx.moveTo(-s*.2,-s*.2);ctx.lineTo(s*.2,-s*.2);ctx.lineTo(s*.55,s*.85);ctx.quadraticCurveTo(0,s*1.05,-s*.55,s*.85);ctx.fill();
+ // голова
+ ctx.fillStyle='#ffe3d3';ctx.beginPath();ctx.arc(0,-s*.5,s*.33,0,6.283);ctx.fill();
+ ctx.fillStyle='#ffb347';ctx.beginPath();ctx.ellipse(0,-s*.72,s*.36,s*.2,0,3.3,6.1);ctx.fill();
+ ctx.fillStyle='#4a2160';[-.13,.13].forEach(e=>{ctx.beginPath();ctx.ellipse(e*s,-s*.48,s*.045,s*.065,0,0,6.283);ctx.fill()});
+ ctx.fillStyle='rgba(255,110,150,.55)';[-.22,.22].forEach(e=>{ctx.beginPath();ctx.arc(e*s,-s*.38,s*.07,0,6.283);ctx.fill()});
+ ctx.strokeStyle='#c2406f';ctx.lineWidth=1.6;ctx.beginPath();ctx.arc(0,-s*.4,s*.08,.2,2.9);ctx.stroke();
+ // корона
+ ctx.fillStyle='#ffd86b';ctx.beginPath();ctx.moveTo(-s*.2,-s*.8);ctx.lineTo(-s*.12,-s*1);ctx.lineTo(0,-s*.84);ctx.lineTo(s*.12,-s*1);ctx.lineTo(s*.2,-s*.8);ctx.fill();
+ // волшебная палочка
+ ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(s*.3,s*.2);ctx.lineTo(s*.85,-s*.35);ctx.stroke();
+ ctx.fillStyle='#fff7b0';starPath(s*.9,-s*.4,s*.18,s*.08,t*3);ctx.fill();
+ ctx.restore();ctx.globalAlpha=1;
+}
+function draw(){
+ ctx.save();
+ if(shake>0)ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);
+ drawBg();
+ for(const it of items)drawItem(it);
+ ctx.globalCompositeOperation='lighter';
+ for(const p of parts){ctx.globalAlpha=Math.max(0,p.life);glow(p.x,p.y,p.r*3.2,`hsla(${p.h},100%,70%,A)`,.9)}
+ ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+ drawFairy();
+ ctx.textAlign='center';ctx.font=`600 ${U*.7}px Fredoka,"Trebuchet MS",sans-serif`;
+ for(const f of floats){ctx.globalAlpha=Math.max(0,f.life);ctx.fillStyle=f.col;ctx.strokeStyle='rgba(26,11,61,.8)';ctx.lineWidth=4;ctx.strokeText(f.txt,f.x,f.y);ctx.fillText(f.txt,f.x,f.y)}
+ ctx.globalAlpha=1;ctx.restore();
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
 
-    W = w; H = h;
-    
-    canvas.width = W * dpr;
-    canvas.height = H * dpr;
-    canvas.style.width = W + 'px';
-    canvas.style.height = H + 'px';
-    
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    
-    drawBase();
-    restoreHistory();
-  }
-
-  // --- ГИПЕР-ГРАФИКА ---
-  function drawBase() {
-    const m = models[currentModelIndex];
-    
-    // 1. Роскошный фон
-    let grad = ctx.createLinearGradient(0, 0, W, H);
-    if (m.bg === 'linear') {
-      grad.addColorStop(0, '#1a1a2e'); grad.addColorStop(1, '#16213e');
-    } else {
-      grad = ctx.createRadialGradient(W/2, H/2, 10, W/2, H/2, W);
-      grad.addColorStop(0, '#2c1b3d'); grad.addColorStop(1, '#0f0c14');
-    }
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    // Спасибо за тень и свечение
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 10;
-
-    // 2. Шея (объемная с градиентом)
-    let neckGrad = ctx.createLinearGradient(W*0.4, 0, W*0.6, 0);
-    neckGrad.addColorStop(0, m.skinShadow);
-    neckGrad.addColorStop(0.5, m.skinBase);
-    neckGrad.addColorStop(1, m.skinShadow);
-    ctx.fillStyle = neckGrad;
-    ctx.beginPath();
-    ctx.moveTo(W*0.38, H*0.6);
-    ctx.lineTo(W*0.62, H*0.6);
-    ctx.lineTo(W*0.65, H);
-    ctx.lineTo(W*0.35, H);
-    ctx.fill();
-
-    // 3. Одежда (элегантное платье)
-    ctx.fillStyle = '#0a0a0a';
-    ctx.beginPath();
-    ctx.moveTo(W*0.2, H);
-    ctx.quadraticCurveTo(W*0.3, H*0.7, W/2, H*0.75);
-    ctx.quadraticCurveTo(W*0.7, H*0.7, W*0.8, H);
-    ctx.fill();
-    
-    // Блик на платье
-    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    // 4. Волосы сзади (с градиентом)
-    ctx.shadowColor = 'rgba(0,0,0,0.7)';
-    ctx.shadowBlur = 30;
-    ctx.shadowOffsetY = 15;
-    
-    let hairGrad = ctx.createLinearGradient(0, H*0.2, 0, H*0.9);
-    hairGrad.addColorStop(0, m.hairHighlight);
-    hairGrad.addColorStop(0.5, m.hairBase);
-    hairGrad.addColorStop(1, '#000');
-    
-    ctx.fillStyle = hairGrad;
-    ctx.beginPath();
-    ctx.ellipse(W/2, H*0.45, W*0.38, H*0.38, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // 5. Лицо (с мягкой светотенью)
-    ctx.shadowColor = 'transparent'; // Убираем тень для лица
-    ctx.shadowBlur = 0;
-    
-    let faceGrad = ctx.createRadialGradient(W/2, H*0.35, W*0.1, W/2, H*0.4, W*0.3);
-    faceGrad.addColorStop(0, '#ffffff'); // Свет на лбу и носу
-    faceGrad.addColorStop(0.4, m.skinBase);
-    faceGrad.addColorStop(1, m.skinShadow); // Затемнение по бокам
-    
-    ctx.fillStyle = faceGrad;
-    ctx.beginPath();
-    ctx.ellipse(W/2, H*0.4, W*0.26, H*0.3, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // Уши (с тенью)
-    ctx.fillStyle = m.skinShadow;
-    ctx.beginPath(); ctx.ellipse(W*0.26, H*0.4, W*0.04, H*0.06, -0.2, 0, Math.PI*2); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(W*0.74, H*0.4, W*0.04, H*0.06, 0.2, 0, Math.PI*2); ctx.fill();
-
-    // 6. Волосы спереди (объемная челка)
-    ctx.shadowBlur = 10; ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.fillStyle = hairGrad;
-    ctx.beginPath();
-    ctx.moveTo(W*0.24, H*0.35);
-    ctx.bezierCurveTo(W*0.3, H*0.1, W*0.7, H*0.1, W*0.76, H*0.35);
-    ctx.bezierCurveTo(W*0.6, H*0.25, W*0.4, H*0.25, W*0.24, H*0.35);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // 7. Глаза (глубокие, с ресницами)
-    drawEye(W*0.38, H*0.42);
-    drawEye(W*0.62, H*0.42);
-
-    // 8. Брови
-    ctx.strokeStyle = m.hairBase;
-    ctx.lineWidth = 6;
-    ctx.lineCap = 'round';
-    ctx.beginPath(); ctx.moveTo(W*0.32, H*0.34); ctx.quadraticCurveTo(W*0.38, H*0.31, W*0.44, H*0.34); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(W*0.56, H*0.34); ctx.quadraticCurveTo(W*0.62, H*0.31, W*0.68, H*0.34); ctx.stroke();
-
-    // 9. Нос (легкая тень)
-    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
-    ctx.lineWidth = 4;
-    ctx.beginPath(); ctx.moveTo(W*0.5, H*0.45); ctx.quadraticCurveTo(W*0.53, H*0.49, W*0.5, H*0.52); ctx.stroke();
-
-    // 10. Губы (пухлые, с бликом)
-    let lipGrad = ctx.createLinearGradient(0, H*0.55, 0, H*0.62);
-    lipGrad.addColorStop(0, '#e58989');
-    lipGrad.addColorStop(1, '#c96b6b');
-    ctx.fillStyle = lipGrad;
-    
-    ctx.beginPath();
-    ctx.moveTo(W*0.43, H*0.58);
-    ctx.quadraticCurveTo(W*0.48, H*0.54, W/2, H*0.57);
-    ctx.quadraticCurveTo(W*0.52, H*0.54, W*0.57, H*0.58);
-    ctx.quadraticCurveTo(W*0.5, H*0.64, W*0.43, H*0.58);
-    ctx.fill();
-    
-    // Блик на губах
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(W*0.5, H*0.585, W*0.03, H*0.01, 0, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  function drawEye(x, y) {
-    // Глубокая глазница
-    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    ctx.beginPath();
-    ctx.ellipse(x, y - H*0.01, W*0.08, H*0.05, 0, 0, Math.PI*2);
-    ctx.fill();
-
-    // Склера (белок)
-    ctx.fillStyle = '#fcfcfc';
-    ctx.beginPath();
-    ctx.ellipse(x, y, W*0.07, H*0.035, 0, 0, Math.PI*2);
-    ctx.fill();
-    
-    // Радужка (карие глаза)
-    let irisGrad = ctx.createRadialGradient(x, y, W*0.005, x, y, W*0.03);
-    irisGrad.addColorStop(0, '#4a2e1b');
-    irisGrad.addColorStop(1, '#1a0f08');
-    ctx.fillStyle = irisGrad;
-    ctx.beginPath();
-    ctx.arc(x, y, W*0.03, 0, Math.PI*2);
-    ctx.fill();
-
-    // Зрачок
-    ctx.fillStyle = '#000';
-    ctx.beginPath();
-    ctx.arc(x, y, W*0.012, 0, Math.PI*2);
-    ctx.fill();
-
-    // Блик (жизнь в глазах)
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(x - W*0.01, y - H*0.015, W*0.01, 0, Math.PI*2);
-    ctx.fill();
-    
-    // Второй маленький блик
-    ctx.beginPath();
-    ctx.arc(x + W*0.015, y + H*0.01, W*0.004, 0, Math.PI*2);
-    ctx.fill();
-
-    // Верхняя стрелка (подводка)
-    ctx.strokeStyle = '#111';
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(x - W*0.07, y - H*0.01);
-    ctx.quadraticCurveTo(x, y - H*0.04, x + W*0.07, y - H*0.02);
-    ctx.stroke();
-
-    // Ресницы
-    ctx.lineWidth = 2;
-    for(let i=-3; i<=3; i++){
-      ctx.beginPath();
-      ctx.moveTo(x + i*W*0.02, y - H*0.025);
-      ctx.lineTo(x + i*W*0.025, y - H*0.04);
-      ctx.stroke();
-    }
-  }
-
-  function getPos(e) {
-    const rect = canvas.getBoundingClientRect();
-    let clientX = e.clientX;
-    let clientY = e.clientY;
-    if (e.touches && e.touches.length > 0) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
-  }
-
-  function saveHistory() {
-    if (history.length >= MAX_HISTORY) history.shift();
-    history.push(canvas.toDataURL());
-  }
-
-  function restoreHistory() {
-    if (history.length === 0) return;
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(img, 0, 0, W, H);
-    };
-    img.src = history[history.length - 1];
-  }
-
-  function applyBrushSettings() {
-    ctx.globalCompositeOperation = 'source-over';
-    
-    if (currentTool === 'eraser') {
-      // Умный ластик (стирает макияж, оставляя лицо)
-      ctx.globalCompositeOperation = 'destination-out';
-      ctx.globalAlpha = 1.0;
-    } else {
-      ctx.strokeStyle = currentColor;
-      ctx.fillStyle = currentColor;
-      
-      // Эффекты для разных инструментов
-      if (currentTool === 'blush') {
-        ctx.globalAlpha = 0.2;
-        ctx.shadowColor = currentColor;
-        ctx.shadowBlur = 20; // Мягкое размытие для румян
-      } else if (currentTool === 'eyes') {
-        ctx.globalAlpha = 0.4;
-        ctx.shadowColor = currentColor;
-        ctx.shadowBlur = 15; // Сияние для теней
-      } else {
-        ctx.globalAlpha = 1.0;
-        ctx.shadowBlur = 0;
-      }
-    }
-    
-    ctx.lineWidth = brushSize;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-  }
-
-  function startDraw(e) {
-    e.preventDefault();
-    saveHistory();
-    isDrawing = true;
-    const pos = getPos(e);
-    lastX = pos.x;
-    lastY = pos.y;
-    
-    applyBrushSettings();
-    
-    ctx.beginPath();
-    ctx.arc(lastX, lastY, brushSize/2, 0, Math.PI*2);
-    ctx.fill();
-  }
-
-  function moveDraw(e) {
-    if (!isDrawing) return;
-    e.preventDefault();
-    const pos = getPos(e);
-    
-    applyBrushSettings();
-    
-    ctx.beginPath();
-    ctx.moveTo(lastX, lastY);
-    ctx.lineTo(pos.x, pos.y);
-    ctx.stroke();
-    
-    lastX = pos.x;
-    lastY = pos.y;
-  }
-
-  function endDraw() {
-    isDrawing = false;
-    ctx.globalAlpha = 1.0;
-    ctx.shadowBlur = 0;
-  }
-
-  function initEvents() {
-    canvas.addEventListener('mousedown', startDraw);
-    canvas.addEventListener('mousemove', moveDraw);
-    window.addEventListener('mouseup', endDraw);
-    
-    canvas.addEventListener('touchstart', startDraw, {passive: false});
-    canvas.addEventListener('touchmove', moveDraw, {passive: false});
-    window.addEventListener('touchend', endDraw);
-
-    document.getElementById('btnUndo').onclick = () => {
-      if (history.length > 0) {
-        history.pop();
-        if (history.length > 0) restoreHistory();
-        else drawBase();
-      }
-    };
-
-    document.getElementById('btnNext').onclick = () => {
-      currentModelIndex = (currentModelIndex + 1) % models.length;
-      history = [];
-      drawBase();
-    };
-  }
-
-  window.addEventListener('resize', resize);
-  
-  initUI();
-  resize();
-  initEvents();
-  
-  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+document.getElementById('b').onclick=()=>{tone(520,.1);startLevel(0)};
+hud();document.getElementById('lvl').textContent='';
+fairy.x=W/2;fairy.y=H*.6;
+loop();
 })();
 </script>
 </body>

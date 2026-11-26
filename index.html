@@ -1,161 +1,254 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Салон красоты: Макияж</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Makeup Salon</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
-
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
-  html, body { margin: 0; padding: 0; height: 100%; }
+  :root { --bg:#fdf2f8; --panel:#fff; --accent:#ec4899; --border:#f9a8d4; }
+  * { box-sizing: border-box; }
   body {
-    height: 100vh; overflow: hidden;
-    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    font-family: 'Nunito', sans-serif;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: space-between;
+    margin:0; min-height:100vh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:12px;
+    background:var(--bg); font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+    padding:16px;
   }
-
-  #canvas-container {
-    position: relative;
-    width: 100%;
-    flex-grow: 1;
-    display: flex; justify-content: center; align-items: center;
-    overflow: hidden;
-    touch-action: none;
+  h1 { font-size:1.3rem; color:#9d174d; margin:0; }
+  #stage {
+    position:relative; width:400px; height:750px; max-width:100%;
+    background:var(--panel); border:2px solid var(--border);
+    border-radius:16px; overflow:hidden; box-shadow:0 8px 24px rgba(236,72,153,.15);
   }
-
-  #viewport {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform-origin: center center;
-    will-change: transform;
+  #gameCanvas { width:100%; height:100%; display:block; touch-action:none; cursor:crosshair; }
+  .toolbar {
+    display:flex; gap:8px; flex-wrap:wrap; justify-content:center;
+    background:var(--panel); padding:8px; border-radius:12px; border:1px solid var(--border);
   }
-
-  canvas#gameCanvas {
-    position: relative;
-    display: block;
-    touch-action: none;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-    background: #fff;
+  .toolbar button {
+    border:2px solid transparent; background:#fce7f3; color:#9d174d;
+    padding:8px 12px; border-radius:10px; font-size:.85rem; cursor:pointer;
+    transition:.15s;
   }
-
-  #toolbar {
-    width: 100%;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top-left-radius: 25px;
-    border-top-right-radius: 25px;
-    padding: 12px 10px 20px 10px;
-    display: flex; flex-direction: column; gap: 10px;
-    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
-    z-index: 10;
+  .toolbar button:hover { background:#fbcfe8; }
+  .toolbar button.active { border-color:var(--accent); background:#fbcfe8; font-weight:600; }
+  .row { display:flex; gap:8px; }
+  .row button {
+    border:none; background:var(--accent); color:#fff; padding:8px 16px;
+    border-radius:10px; cursor:pointer; font-size:.85rem;
   }
-
-  #colors {
-    display: flex; justify-content: center; gap: 10px;
-    overflow-x: auto; padding: 4px;
-  }
-
-  .color-btn {
-    width: 40px; height: 40px; border-radius: 50%;
-    border: 3px solid #fff;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
-    flex-shrink: 0;
-    transition: transform 0.15s;
-    cursor: pointer;
-  }
-  .color-btn.active { transform: scale(1.2); border-color: #ffb6c1; }
-
-  #tools {
-    display: flex; justify-content: center; gap: 8px; flex-wrap: wrap;
-  }
-
-  .tool-btn {
-    background: #f0f4f8; border: none; border-radius: 16px;
-    padding: 9px 13px; font-size: 14px; font-weight: 700; color: #5a6b7c;
-    display: flex; align-items: center; gap: 6px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-    cursor: pointer; transition: all 0.2s;
-    font-family: 'Nunito', sans-serif;
-  }
-  .tool-btn.active { background: #ffb6c1; color: #fff; box-shadow: 0 4px 10px rgba(255,182,193,0.4); }
-
-  #sizeRow {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    font-size: 13px; color: #8a97a3; font-weight: 700;
-  }
-  #sizeRow input[type=range] { width: 140px; accent-color: #ffb6c1; }
-
-  #top-controls {
-    position: absolute; top: 16px; right: 16px;
-    display: flex; flex-direction: column; gap: 8px; z-index: 10;
-  }
-  #zoom-controls {
-    position: absolute; top: 16px; left: 16px;
-    display: flex; flex-direction: column; gap: 8px; z-index: 10;
-  }
-  .icon-btn {
-    width: 46px; height: 46px; border-radius: 50%;
-    background: #fff; border: none;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-    font-size: 20px; display: flex; justify-content: center; align-items: center;
-    cursor: pointer; transition: transform 0.15s;
-    padding: 0;
-  }
-  .icon-btn:active { transform: scale(0.88); }
-  .icon-btn.on { background: #ffb6c1; color: #fff; }
-
-  #hint {
-    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
-    background: rgba(0,0,0,0.55); color: #fff; font-size: 12px; font-weight: 700;
-    padding: 6px 14px; border-radius: 20px; white-space: nowrap;
-    opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 10;
-  }
-  #hint.show { opacity: 1; }
+  .row button:hover { filter:brightness(1.08); }
+  .hint { font-size:.75rem; color:#be185d; opacity:.8; }
 </style>
 </head>
 <body>
+<h1>💄 Makeup Salon</h1>
 
-  <div id="canvas-container">
-    <div id="viewport">
-      <canvas id="gameCanvas"></canvas>
-    </div>
+<div id="stage">
+  <canvas id="gameCanvas" width="400" height="750"></canvas>
+</div>
 
-    <div id="zoom-controls">
-      <button class="icon-btn" id="btnZoomIn" title="Приблизить">🔍+</button>
-      <button class="icon-btn" id="btnZoomOut" title="Отдалить">🔍-</button>
-      <button class="icon-btn" id="btnPan" title="Режим перемещения">✋</button>
-    </div>
+<div class="toolbar" id="tools">
+  <button data-tool="blush" class="active">Румяна</button>
+  <button data-tool="liner">Подводка</button>
+  <button data-tool="eraser">Ластик</button>
+</div>
 
-    <div id="top-controls">
-      <button class="icon-btn" id="btnUndo" title="Отменить">↩️</button>
-      <button class="icon-btn" id="btnNext" title="Следующая модель">➡️</button>
-    </div>
+<div class="row">
+  <button id="btnUndo">↶ Undo</button>
+  <button id="btnNext">Следующая модель →</button>
+</div>
 
-    <div id="hint">Два пальца — зум и перемещение</div>
-  </div>
-
-  <div id="toolbar">
-    <div id="colors"></div>
-    <div id="tools">
-      <button class="tool-btn active" data-tool="brush">💄 Помада</button>
-      <button class="tool-btn" data-tool="eyes">✨ Тени</button>
-      <button class="tool-btn" data-tool="blush">🌸 Румяна</button>
-      <button class="tool-btn" data-tool="liner">🖊️ Лайнер</button>
-      <button class="tool-btn" data-tool="eraser">🧽 Ластик</button>
-    </div>
-    <div id="sizeRow">
-      <span>Размер кисти</span>
-      <input type="range" id="brushSizeSlider" min="4" max="50" value="12">
-    </div>
-  </div>
+<div class="hint">Рисуйте мышью или пальцем. Ластик работает только в зоне лица.</div>
 
 <script>
-/* placeholder - full script injected next */
+(() => {
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  const W = canvas.width, H = canvas.height;
+
+  // 8 моделей: разные тона кожи + цвет волос
+  const MODELS = [
+    { skin:'#f6d5c0', hair:'#3b2314' },
+    { skin:'#e8b99a', hair:'#1f1a17' },
+    { skin:'#d9a07a', hair:'#5a3825' },
+    { skin:'#c78a63', hair:'#2b1d14' },
+    { skin:'#a9714b', hair:'#111'    },
+    { skin:'#8a5a3b', hair:'#2a1a10' },
+    { skin:'#6b4226', hair:'#0d0d0d' },
+    { skin:'#f1c9b3', hair:'#8b5e3c' },
+  ];
+  let modelIndex = 0;
+
+  // Параметры лица (в координатах canvas)
+  const FACE = { cx: W*0.5, cy: H*0.45, rx: W*0.28, ry: H*0.30 };
+  const EYE_L = { x: W*0.38, y: H*0.365 };
+  const EYE_R = { x: W*0.62, y: H*0.365 };
+  const CHEEK_L = { x: W*0.27, y: H*0.52 };
+  const CHEEK_R = { x: W*0.73, y: H*0.52 };
+
+  // Слои: base (лицо) + makeup (штрихи). Undo — стек снимков makeup-слоя.
+  const baseLayer = document.createElement('canvas'); baseLayer.width = W; baseLayer.height = H;
+  const makeupLayer = document.createElement('canvas'); makeupLayer.width = W; makeupLayer.height = H;
+  const bctx = baseLayer.getContext('2d');
+  const mctx = makeupLayer.getContext('2d');
+  const undoStack = [];
+  const UNDO_LIMIT = 30;
+
+  let tool = 'blush';
+  let drawing = false;
+  let last = null;
+
+  function drawBase() {
+    const m = MODELS[modelIndex];
+    bctx.clearRect(0,0,W,H);
+    // фон
+    const g = bctx.createLinearGradient(0,0,0,H);
+    g.addColorStop(0,'#fff1f6'); g.addColorStop(1,'#ffe4ef');
+    bctx.fillStyle = g; bctx.fillRect(0,0,W,H);
+    // шея
+    bctx.fillStyle = m.skin;
+    bctx.fillRect(FACE.cx - W*0.09, FACE.cy + FACE.ry*0.55, W*0.18, H*0.22);
+    // волосы (сзади)
+    bctx.fillStyle = m.hair;
+    bctx.beginPath();
+    bctx.ellipse(FACE.cx, FACE.cy - FACE.ry*0.15, FACE.rx*1.18, FACE.ry*1.15, 0, 0, Math.PI*2);
+    bctx.fill();
+    // лицо
+    bctx.fillStyle = m.skin;
+    bctx.beginPath();
+    bctx.ellipse(FACE.cx, FACE.cy, FACE.rx, FACE.ry, 0, 0, Math.PI*2);
+    bctx.fill();
+    // чёлка
+    bctx.fillStyle = m.hair;
+    bctx.beginPath();
+    bctx.ellipse(FACE.cx, FACE.cy - FACE.ry*0.72, FACE.rx*1.05, FACE.ry*0.42, 0, 0, Math.PI*2);
+    bctx.fill();
+    // глаза
+    for (const e of [EYE_L, EYE_R]) {
+      bctx.fillStyle = '#fff';
+      bctx.beginPath(); bctx.ellipse(e.x, e.y, W*0.045, H*0.018, 0, 0, Math.PI*2); bctx.fill();
+      bctx.fillStyle = '#2b2b2b';
+      bctx.beginPath(); bctx.arc(e.x, e.y, W*0.018, 0, Math.PI*2); bctx.fill();
+    }
+    // губы
+    bctx.fillStyle = '#c96b6b';
+    bctx.beginPath(); bctx.ellipse(FACE.cx, FACE.cy + FACE.ry*0.5, W*0.06, H*0.015, 0, 0, Math.PI*2); bctx.fill();
+  }
+
+  function composite() {
+    ctx.clearRect(0,0,W,H);
+    ctx.drawImage(baseLayer, 0, 0);
+    ctx.drawImage(makeupLayer, 0, 0);
+  }
+
+  // Маска «зоны лица» — ластик работает только внутри эллипса лица
+  function inFace(x, y) {
+    const dx = (x - FACE.cx) / (FACE.rx * 0.95);
+    const dy = (y - FACE.cy) / (FACE.ry * 0.95);
+    return dx*dx + dy*dy <= 1;
+  }
+
+  function pushUndo() {
+    undoStack.push(mctx.getImageData(0,0,W,H));
+    if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  }
+
+  function stroke(from, to) {
+    mctx.save();
+    if (tool === 'eraser') {
+      mctx.globalCompositeOperation = 'destination-out';
+      mctx.lineWidth = 18; mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+      mctx.beginPath(); mctx.moveTo(from.x, from.y); mctx.lineTo(to.x, to.y); mctx.stroke();
+    } else if (tool === 'blush') {
+      mctx.globalCompositeOperation = 'source-over';
+      const grad = mctx.createRadialGradient(to.x, to.y, 0, to.x, to.y, 26);
+      grad.addColorStop(0, 'rgba(244,114,182,0.35)');
+      grad.addColorStop(1, 'rgba(244,114,182,0)');
+      mctx.fillStyle = grad;
+      mctx.beginPath(); mctx.arc(to.x, to.y, 26, 0, Math.PI*2); mctx.fill();
+    } else if (tool === 'liner') {
+      mctx.globalCompositeOperation = 'source-over';
+      mctx.strokeStyle = '#1a1a1a'; mctx.lineWidth = 2.5;
+      mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+      mctx.beginPath(); mctx.moveTo(from.x, from.y); mctx.lineTo(to.x, to.y); mctx.stroke();
+    }
+    mctx.restore();
+  }
+
+  function pos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = e.touches ? e.touches[0] : e;
+    return {
+      x: (src.clientX - r.left) * (W / r.width),
+      y: (src.clientY - r.top)  * (H / r.height),
+    };
+  }
+
+  function onDown(e) {
+    e.preventDefault();
+    pushUndo();
+    drawing = true;
+    last = pos(e);
+    // точка-старт для румян
+    if (tool === 'blush') stroke(last, last);
+  }
+  function onMove(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    if (tool === 'eraser') {
+      // ластик: режем только внутри лица — рисуем через clip по эллипсу
+      mctx.save();
+      mctx.beginPath();
+      mctx.ellipse(FACE.cx, FACE.cy, FACE.rx*0.95, FACE.ry*0.95, 0, 0, Math.PI*2);
+      mctx.clip();
+      mctx.globalCompositeOperation = 'destination-out';
+      mctx.lineWidth = 18; mctx.lineCap = 'round'; mctx.lineJoin = 'round';
+      mctx.beginPath(); mctx.moveTo(last.x, last.y); mctx.lineTo(p.x, p.y); mctx.stroke();
+      mctx.restore();
+    } else {
+      stroke(last, p);
+    }
+    last = p;
+    composite();
+  }
+  function onUp() { drawing = false; last = null; composite(); }
+
+  canvas.addEventListener('mousedown', onDown);
+  canvas.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive:false });
+  canvas.addEventListener('touchmove', onMove, { passive:false });
+  window.addEventListener('touchend', onUp);
+
+  // Инструменты
+  document.getElementById('tools').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-tool]');
+    if (!b) return;
+    tool = b.dataset.tool;
+    document.querySelectorAll('#tools [data-tool]').forEach(x => x.classList.toggle('active', x === b));
+  });
+
+  // Undo
+  document.getElementById('btnUndo').addEventListener('click', () => {
+    if (!undoStack.length) return;
+    const prev = undoStack.pop();
+    mctx.putImageData(prev, 0, 0);
+    composite();
+  });
+
+  // Следующая модель (сбрасывает макияж)
+  document.getElementById('btnNext').addEventListener('click', () => {
+    modelIndex = (modelIndex + 1) % MODELS.length;
+    mctx.clearRect(0,0,W,H);
+    undoStack.length = 0;
+    drawBase();
+    composite();
+  });
+
+  drawBase();
+  composite();
+})();
 </script>
 </body>
 </html>

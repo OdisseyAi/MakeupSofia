@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Салон красоты: Макияж</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+  body {
+    margin: 0; padding: 0; height: 100vh; overflow: hidden;
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    font-family: 'Nunito', sans-serif;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: space-between;
+  }
+
+  /* Экран с лицом */
+  #canvas-container {
+    position: relative;
+    width: 100%;
+    flex-grow: 1;
+    display: flex; justify-content: center; align-items: center;
+  }
+
+  canvas {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    touch-action: none;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: #fff;
+  }
+
+  /* Панель с инструментами */
+  #toolbar {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top-left-radius: 25px;
+    border-top-right-radius: 25px;
+    padding: 15px 10px 25px 10px;
+    display: flex; flex-direction: column; gap: 12px;
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+    z-index: 10;
+  }
+
+  /* Палитра цветов */
+  #colors {
+    display: flex; justify-content: center; gap: 12px;
+    overflow-x: auto; padding: 5px;
+  }
+  
+  .color-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 3px solid #fff;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    flex-shrink: 0;
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .color-btn.active { transform: scale(1.2); border-color: #ffb6c1; }
+
+  /* Инструменты */
+  #tools {
+    display: flex; justify-content: center; gap: 15px;
+  }
+
+  .tool-btn {
+    background: #f0f4f8; border: none; border-radius: 16px;
+    padding: 10px 20px; font-size: 16px; font-weight: 700; color: #5a6b7c;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .tool-btn.active { background: #ffb6c1; color: #fff; box-shadow: 0 4px 10px rgba(255,182,193,0.4); }
+
+  /* Верхние кнопки */
+  #top-controls {
+    position: absolute; top: 20px; right: 20px;
+    display: flex; gap: 10px; z-index: 10;
+  }
+  .icon-btn {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: #fff; border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    font-size: 24px; display: flex; justify-content: center; align-items: center;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .icon-btn:active { transform: scale(0.9); }
+
+  /* Кисть */
+  .cursor {
+    position: absolute; pointer-events: none;
+    width: 30px; height: 30px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+  <div id="canvas-container">
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="top-controls">
+      <button class="icon-btn" id="btnUndo" title="Отменить">↩️</button>
+      <button class="icon-btn" id="btnNext" title="Следующая модель">➡️</button>
+    </div>
+    
+    <div class="cursor" id="brushCursor"></div>
+  </div>
+
+  <div id="toolbar">
+    <div id="colors">
+      <!-- Цвета будут добавлены через JS -->
+    </div>
+    <div id="tools">
+      <button class="tool-btn active" data-tool="brush">💄 Помада</button>
+      <button class="tool-btn" data-tool="eyes">✨ Тени</button>
+      <button class="tool-btn" data-tool="blush">🌸 Румяна</button>
+      <button class="tool-btn" data-tool="eraser">🧽 Ластик</button>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+  const container = document.getElementById('canvas-container');
+  const brushCursor = document.getElementById('brushCursor');
+
+  let W = 400, H = 500; // Логические размеры
+  let dpr = window.devicePixelRatio || 1;
+  
+  let isDrawing = false;
+  let lastX = 0, lastY = 0;
+  
+  // Настройки кисти
+  let currentColor = '#e91e63';
+  let currentTool = 'brush';
+  let brushSize = 15;
+  
+  // История для кнопки "Отменить" (Undo)
+  let history = [];
+  const MAX_HISTORY = 10;
+
+  // Данные для моделей
+  const models = [
+    { bg: '#ffeef2', skin: '#fce4d6', hair: '#4a2e1b', lipColor: '#e91e63' },
+    { bg: '#eef9ff', skin: '#f5d0b5', hair: '#d4a373', lipColor: '#ff7043' },
+    { bg: '#f3eeff', skin: '#e8bca4', hair: '#1e1e1e', lipColor: '#d81b60' }
+  ];
+  let currentModelIndex = 0;
+
+  // Палитра цветов
+  const palette = [
+    '#e91e63', '#ff5252', '#ffb300', '#8bc34a', 
+    '#00bcd4', '#3f51b5', '#9c27b0', '#795548', '#ffffff'
+  ];
+
+  function initUI() {
+    const colorsDiv = document.getElementById('colors');
+    palette.forEach(c => {
+      const btn = document.createElement('div');
+      btn.className = 'color-btn';
+      btn.style.background = c;
+      if (c === currentColor) btn.classList.add('active');
+      btn.onclick = () => {
+        currentColor = c;
+        document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      };
+      colorsDiv.appendChild(btn);
+    });
+
+    document.querySelectorAll('.tool-btn').forEach(btn => {
+      btn.onclick = () => {
+        currentTool = btn.dataset.tool;
+        document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Настройки размера кисти для разных инструментов
+        if (currentTool === 'eraser') {
+          brushSize = 35;
+        } else if (currentTool === 'blush') {
+          brushSize = 50;
+        } else if (currentTool === 'eyes') {
+          brushSize = 25;
+        } else {
+          brushSize = 12; // помада
+        }
+      };
+    });
+  }
+
+  function resize() {
+    const rect = container.getBoundingClientRect();
+    const aspect = 4/5;
+    let w = rect.width;
+    let h = rect.height;
+    
+    if (w / h > aspect) {
+      w = h * aspect;
+    } else {
+      h = w / aspect;
+    }
+
+    W = w; H = h;
+    
+    canvas.width = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width = W + 'px';
+    canvas.style.height = H + 'px';
+    
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    
+    // Перерисовываем всё при ресайзе
+    drawBase();
+    restoreHistory();
+  }
+
+  // Рисуем лицо базово (без макияжа)
+  function drawBase() {
+    const m = models[currentModelIndex];
+    
+    // Фон
+    ctx.fillStyle = m.bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Шея
+    ctx.fillStyle = m.skin;
+    ctx.beginPath();
+    ctx.roundRect(W/2 - W*0.1, H*0.6, W*0.2, H*0.2, 20);
+    ctx.fill();
+
+    // Плечи/Одежда
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(W*0.2, H);
+    ctx.quadraticCurveTo(W/2, H*0.8, W*0.8, H);
+    ctx.fill();
+
+    // Волосы сзади
+    ctx.fillStyle = m.hair;
+    ctx.beginPath();
+    ctx.ellipse(W/2, H*0.45, W*0.32, H*0.3, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Уши
+    ctx.fillStyle = m.skin;
+    ctx.beginPath();
+    ctx.ellipse(W*0.28, H*0.4, W*0.06, H*0.08, -0.2, 0, Math.PI*2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(W*0.72, H*0.4, W*0.06, H*0.08, 0.2, 0, Math.PI*2);
+    ctx.fill();
+
+    // Овал лица
+    ctx.beginPath();
+    ctx.ellipse(W/2, H*0.4, W*0.28, H*0.32, 0, 0, Math.PI*2);
+    ctx.fill();
+
+    // Волосы спереди (челка)
+    ctx.fillStyle = m.hair;
+    ctx.beginPath();
+    ctx.moveTo(W*0.22, H*0.35);
+    ctx.quadraticCurveTo(W/2, H*0.1, W*0.78, H*0.35);
+    ctx.quadraticCurveTo(W*0.7, H*0.25, W/2, H*0.25);
+    ctx.quadraticCurveTo(W*0.3, H*0.25, W*0.22, H*0.35);
+    ctx.fill();
+
+    // Глаза
+    drawEye(W*0.38, H*0.4);
+    drawEye(W*0.62, H*0.4);
+
+    // Брови
+    ctx.strokeStyle = m.hair;
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    
+    ctx.beginPath();
+    ctx.moveTo(W*0.33, H*0.32);
+    ctx.quadraticCurveTo(W*0.38, H*0.3, W*0.43, H*0.33);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(W*0.57, H*0.33);
+    ctx.quadraticCurveTo(W*0.62, H*0.3, W*0.67, H*0.32);
+    ctx.stroke();
+
+    // Нос
+    ctx.strokeStyle = 'rgba(0,0,0,0.1)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(W*0.5, H*0.45);
+    ctx.quadraticCurveTo(W*0.52, H*0.48, W*0.5, H*0.5);
+    ctx.stroke();
+
+    // Губы (базовые)
+    ctx.fillStyle = '#f1a4a4';
+    ctx.beginPath();
+    ctx.moveTo(W*0.45, H*0.58);
+    ctx.quadraticCurveTo(W*0.5, H*0.55, W*0.55, H*0.58);
+    ctx.quadraticCurveTo(W*0.5, H*0.62, W*0.45, H*0.58);
+    ctx.fill();
+  }
+
+  function drawEye(x, y) {
+    // Белок
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.ellipse(x, y, W*0.06, H*0.03, 0, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Зрачок
+    ctx.fillStyle = '#5a6b7c';
+    ctx.beginPath();
+    ctx.arc(x, y, W*0.025, 0, Math.PI*2);
+    ctx.fill();
+
+    // Блик
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(x - W*0.01, y - H*0.01, W*0.008, 0, Math.PI*2);
+    ctx.fill();
+
+    // Ресницы
+    ctx.strokeStyle = '#2c3e50';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - W*0.06, y);
+    ctx.quadraticCurveTo(x, y - H*0.03, x + W*0.06, y);
+    ctx.stroke();
+  }
+
+  function getPos(e) {
+    const rect = canvas.getBoundingClientRect();
+    let clientX = e.clientX;
+    let clientY = e.clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    }
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  function saveHistory() {
+    if (history.length >= MAX_HISTORY) history.shift();
+    history.push(canvas.toDataURL());
+  }
+
+  function restoreHistory() {
+    if (history.length === 0) return;
+    const img = new Image();
+    img.onload = () => {
+      ctx.clearRect(0, 0, W, H);
+      ctx.drawImage(img, 0, 0, W, H);
+    };
+    img.src = history[history.length - 1];
+  }
+
+  function drawLine(x0, y0, x1, y1) {
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.lineTo(x1, y1);
+    ctx.stroke();
+  }
+
+  function startDraw(e) {
+    e.preventDefault();
+    saveHistory();
+    isDrawing = true;
+    const pos = getPos(e);
+    lastX = pos.x;
+    lastY = pos.y;
+    
+    // Ставим точку
+    if (currentTool === 'eraser') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = models[currentModelIndex].bg; // Не идеальный ластик, но стирает фоном
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, brushSize/2, 0, Math.PI*2);
+      ctx.fill();
+    } else {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = currentColor;
+      ctx.fillStyle = currentColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      
+      // Для румян и теней делаем прозрачность
+      if (currentTool === 'blush' || currentTool === 'eyes') {
+        ctx.globalAlpha = 0.4;
+      } else {
+        ctx.globalAlpha = 1.0;
+      }
+      
+      ctx.beginPath();
+      ctx.arc(lastX, lastY, brushSize/2, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  function moveDraw(e) {
+    if (!isDrawing) {
+      // Двигаем курсор
+      const pos = getPos(e);
+      brushCursor.style.display = 'block';
+      brushCursor.style.left = (pos.x + canvas.offsetLeft) + 'px';
+      brushCursor.style.top = (pos.y + canvas.offsetTop) + 'px';
+      brushCursor.style.width = brushSize + 'px';
+      brushCursor.style.height = brushSize + 'px';
+      return;
+    }
+    
+    e.preventDefault();
+    const pos = getPos(e);
+    
+    if (currentTool === 'eraser') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = models[currentModelIndex].bg;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.globalAlpha = 1.0;
+    } else {
+      ctx.strokeStyle = currentColor;
+      ctx.lineWidth = brushSize;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      if (currentTool === 'blush' || currentTool === 'eyes') {
+        ctx.globalAlpha = 0.4;
+      } else {
+        ctx.globalAlpha = 1.0;
+      }
+    }
+    
+    drawLine(lastX, lastY, pos.x, pos.y);
+    
+    lastX = pos.x;
+    lastY = pos.y;
+  }
+
+  function endDraw() {
+    isDrawing = false;
+  }
+
+  // Инициализация событий
+  function initEvents() {
+    canvas.addEventListener('mousedown', startDraw);
+    canvas.addEventListener('mousemove', moveDraw);
+    window.addEventListener('mouseup', endDraw);
+    
+    canvas.addEventListener('touchstart', startDraw, {passive: false});
+    canvas.addEventListener('touchmove', moveDraw, {passive: false});
+    window.addEventListener('touchend', endDraw);
+
+    // Кнопка "Отменить"
+    document.getElementById('btnUndo').onclick = () => {
+      if (history.length > 0) {
+        history.pop(); // Удаляем текущее состояние
+        if (history.length > 0) {
+          restoreHistory();
+        } else {
+          drawBase();
+        }
+      }
+    };
+
+    // Кнопка "Следующая модель"
+    document.getElementById('btnNext').onclick = () => {
+      currentModelIndex = (currentModelIndex + 1) % models.length;
+      history = []; // Очищаем историю при смене лица
+      drawBase();
+    };
+  }
+
+  // Полифилл для ctx.roundRect (для старых Safari)
+  if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function (x, y, w, h, r) {
+      if (w < 2 * r) r = w / 2;
+      if (h < 2 * r) r = h / 2;
+      this.beginPath();
+      this.moveTo(x + r, y);
+      this.arcTo(x + w, y, x + w, y + h, r);
+      this.arcTo(x + w, y + h, x, y + h, r);
+      this.arcTo(x, y + h, x, y, r);
+      this.arcTo(x, y, x + w, y, r);
+      this.closePath();
+      return this;
+    };
+  }
+
+  window.addEventListener('resize', resize);
+  
+  // Старт
+  initUI();
+  resize();
+  initEvents();
+  
+  // Защита от случайного зума
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+
+})();
+</script>
+</body>
+</html>
